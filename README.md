@@ -171,8 +171,6 @@ The knowledge assistant answers user questions using retrieved document passages
 - Similarity threshold and explicit no-evidence abstention behavior
 - API responses including answer text and retrieved chunk identifiers
 
-> [!NOTE]
-> Source attribution and prompt grounding **reduce risk**, but do not guarantee factual correctness. The system does not claim strict model-generated citation validation or zero hallucinations.
 
 ### 03 · PDF Parsing, OCR & Document Ingestion
 
