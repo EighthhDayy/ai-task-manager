@@ -2,27 +2,28 @@
 
 # ⚡ AI TASK MANAGER
 
-### An AI-native backend for tasks, documents, and knowledge workflows.
+### Agentic Task Automation & Retrieval-Augmented Knowledge Platform
 
-**Secure REST APIs · Agentic tool execution · Retrieval-augmented knowledge**
+**An end-to-end AI backend built with FastAPI, LLM tool calling, RAG, and asynchronous document processing.**
 
 <br />
 
 ![Python](https://img.shields.io/badge/Python-3.13%2B-3776AB?style=for-the-badge&logo=python&logoColor=white)
-![FastAPI](https://img.shields.io/badge/FastAPI-API-009688?style=for-the-badge&logo=fastapi&logoColor=white)
-![PostgreSQL](https://img.shields.io/badge/PostgreSQL-18-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)
+![FastAPI](https://img.shields.io/badge/FastAPI-Backend-009688?style=for-the-badge&logo=fastapi&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-pgvector-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)
+![Redis](https://img.shields.io/badge/Redis-RQ-DC382D?style=for-the-badge&logo=redis&logoColor=white)
 ![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?style=for-the-badge&logo=docker&logoColor=white)
 
 <br />
 
 [![CI](https://github.com/EighthhDayy/ai-task-manager/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/EighthhDayy/ai-task-manager/actions/workflows/ci.yml)
-![Version](https://img.shields.io/badge/version-0.1.0-555?style=flat-square)
-![API](https://img.shields.io/badge/API-REST%20%2B%20OpenAPI-555?style=flat-square)
-![Status](https://img.shields.io/badge/status-active%20development-7957D5?style=flat-square)
+![OpenAI](https://img.shields.io/badge/OpenAI-Responses%20API-412991?style=flat-square&logo=openai)
+![Auth](https://img.shields.io/badge/Auth-JWT%20%2B%20Argon2-555?style=flat-square)
+![Project](https://img.shields.io/badge/Project-Independent%20Engineering-7957D5?style=flat-square)
 
 <br />
 
-[**Overview**](#overview) · [**Architecture**](#architecture) · [**Capabilities**](#capabilities) · [**Quick Start**](#quick-start) · [**API**](#api-reference) · [**Engineering**](#engineering-decisions) · [**Roadmap**](#roadmap)
+[**Overview**](#overview) · [**Architecture**](#system-architecture) · [**Features**](#core-capabilities) · [**Quick Start**](#quick-start) · [**API**](#api-reference) · [**Engineering**](#engineering-highlights) · [**Roadmap**](#roadmap)
 
 </div>
 
@@ -30,246 +31,330 @@
 
 ## Overview
 
-**AI Task Manager** is a backend engineering project exploring the journey from a conventional authenticated task API to an **LLM-powered workflow and document knowledge platform**.
+**AI Task Manager** is a full-stack-infrastructure-oriented **AI backend system** that connects large language models to real business operations and private document knowledge.
 
-The public repository establishes a Python/FastAPI foundation with **JWT authentication, user-scoped task CRUD, PostgreSQL persistence, database migrations, containerization, and automated tests**.
-
-Beyond the public snapshot, the project has been extended locally with an **LLM tool-calling agent**, a **document RAG pipeline**, **PDF/OCR ingestion**, and **Redis/RQ background workers**.
-
-> [!IMPORTANT]
-> **Repository synchronization status:** The public `main` branch currently contains the **core backend snapshot**. The advanced AI modules described as *local* below have been implemented and exercised in local development, but their latest source files have **not yet been pushed to `main`**. In addition, the current committed `main.py` references an `ai` router that is not yet committed; see [Quick Start](#quick-start) for the core-only workaround. Features marked *planned* are design goals, not completed work.
-
-## At a glance
+Instead of stopping at a chatbot demo, the project combines **natural-language task management**, **controlled function execution**, **document-grounded question answering**, and **reliable background processing** in a modular FastAPI service.
 
 <table>
-<tr>
-<td width="50%" valign="top">
-
-**🛡️ Secure by design**
-
-JWT bearer authentication, Argon2 password hashing, per-user task authorization, and explicit API response schemas.
-
-</td>
-<td width="50%" valign="top">
-
-**🧠 Agent-ready workflows**
-
-Locally developed OpenAI Responses API integration, tool calls routed through backend business logic, and duplicate-operation protection.
-
-</td>
-</tr>
-<tr>
-<td width="50%" valign="top">
-
-**📚 Document intelligence**
-
-Locally developed PDF text extraction, scanned-PDF OCR, paragraph-first chunking, embeddings, and pgvector retrieval.
-
-</td>
-<td width="50%" valign="top">
-
-**⚙️ Backend reliability**
-
-SQLAlchemy transactions, Alembic migrations, Dockerized services, pytest integration tests, and Redis/RQ worker-based processing in local development.
-
-</td>
-</tr>
+  <tr>
+    <td width="50%" valign="top">
+      <h3>🤖 Agentic Operations</h3>
+      Turn natural-language requests into authenticated backend tool calls for real task operations.
+    </td>
+    <td width="50%" valign="top">
+      <h3>📚 Document Intelligence</h3>
+      Upload PDFs, extract text or OCR scanned pages, index content, and answer questions using retrieved evidence.
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top">
+      <h3>⚙️ Asynchronous Execution</h3>
+      Offload expensive document-processing pipelines to Redis/RQ workers and track job progress via APIs.
+    </td>
+    <td width="50%" valign="top">
+      <h3>🛡️ Backend Reliability</h3>
+      Enforce user-level data isolation, protect duplicate agent actions, and maintain typed, testable APIs.
+    </td>
+  </tr>
 </table>
 
-## Architecture
+### What the system does
 
-**Architecture overview** — solid lines represent the public core; dashed lines lead to AI modules developed locally and awaiting repository synchronization.
+- **Manage tasks conversationally:** the LLM selects backend tools; application code validates and executes the operations.
+- **Ask questions about documents:** a RAG pipeline retrieves relevant passages and generates context-grounded answers with source information.
+- **Process scanned and text PDFs:** a hybrid extraction flow handles searchable pages and OCR-required pages.
+- **Keep APIs responsive:** PDF processing and indexing run in an independent worker instead of blocking the upload request.
+- **Preserve data boundaries:** JWT authorization and user-scoped database/retrieval queries restrict access to private resources.
+
+## System Architecture
 
 ```mermaid
 flowchart TB
-    Client["Client / Swagger UI"] --> API["FastAPI · REST API"]
+    U["Client / Swagger UI"] --> API["FastAPI API Layer"]
 
-    subgraph Core["PUBLIC MAIN · Core backend"]
-        API --> Auth["JWT authentication · Argon2"]
-        API --> Tasks["User-scoped task CRUD"]
-        Tasks --> Postgres[("PostgreSQL 18")]
-        Auth --> Postgres
+    subgraph App["Application & Security"]
+        API --> Auth["JWT Auth · Pydantic Validation"]
+        API --> Tasks["Task CRUD"]
+        API --> Agent["LLM Agent · Tool Calling"]
+        Agent --> Tools["Validated Backend Tools"]
+        Tools --> Tasks
+        Tools --> Keys["Idempotency Key Handling"]
     end
 
-    subgraph Extensions["LOCAL DEVELOPMENT · Pending GitHub sync"]
-        API -.-> Agent["LLM Agent · Tool Calling"]
-        Agent --> Ops["Backend tools · Idempotent writes"]
-        Ops -.-> Tasks
-
-        API -.-> Upload["PDF upload / job status"]
-        Upload --> Queue["Redis · RQ queue"]
-        Queue --> Worker["Background worker"]
-        Worker --> Parse["PDF parsing · OCR"]
-        Parse --> Chunk["Paragraph-first chunking"]
-        Chunk --> Embed["Embeddings"]
-        Embed --> Vector[("PostgreSQL · pgvector")]
-
-        API -.-> Retrieval["RAG retrieval"]
-        Vector --> Retrieval
-        Retrieval --> Answer["Grounded answer · Source attribution"]
+    subgraph Docs["Document Ingestion Pipeline"]
+        API --> Upload["PDF Upload · HTTP 202"]
+        Upload --> Redis["Redis · RQ Queue"]
+        Redis --> Worker["Independent Worker"]
+        Worker --> Parser["pypdf · PyMuPDF · Tesseract OCR"]
+        Parser --> Chunk["Paragraph-first Chunking · Overlap"]
+        Chunk --> Embedding["Embedding Generation"]
     end
 
-    classDef core fill:#e8f5f0,stroke:#009688,color:#173e34;
-    classDef local fill:#eef2ff,stroke:#6574cd,color:#25346b;
-    class API,Auth,Tasks,Postgres core;
-    class Agent,Ops,Upload,Queue,Worker,Parse,Chunk,Embed,Vector,Retrieval,Answer local;
+    subgraph RAG["Retrieval-Augmented Generation"]
+        API --> Query["Document Q&A"]
+        Query --> Search["Vector Similarity Search"]
+        Search --> Evidence["Relevant Chunks · Source IDs"]
+        Evidence --> LLM["Grounded LLM Answer"]
+    end
+
+    Tasks --> DB[("PostgreSQL")]
+    Keys --> DB
+    Auth --> DB
+    Embedding --> Vector[("PostgreSQL · pgvector")]
+    Vector --> Search
+
+    classDef primary fill:#e9f6f1,stroke:#009688,color:#1f453c;
+    classDef model fill:#eeeaff,stroke:#7064c2,color:#352e67;
+    class API,Auth,Tasks,Tools,Keys,DB primary;
+    class Agent,LLM,Search,Evidence,Vector model;
 ```
 
-### Technology stack
+<details>
+<summary><strong>How the document RAG pipeline works</strong></summary>
 
-| Layer | Technologies | Scope |
-| :--- | :--- | :--- |
-| API & validation | Python 3.13+, FastAPI, Pydantic | Public `main` |
-| Authentication | JWT, HTTP Bearer, Argon2 | Public `main` |
-| Persistence | PostgreSQL 18, SQLAlchemy, psycopg, Alembic | Public `main` |
-| Delivery & testing | Docker Compose, uv, pytest, GitHub Actions | Public `main` |
-| LLM orchestration | OpenAI Responses API, tool calling, streaming | Local development |
-| Retrieval | Embeddings, PostgreSQL + pgvector, context-grounded QA | Local development |
-| Document processing | pypdf, PyMuPDF, Tesseract OCR | Local development |
-| Background jobs | Redis, RQ, independent worker | Local development |
+```text
+PDF upload
+    │
+    ├─ Extract embedded text (pypdf)
+    └─ OCR scanned pages (PyMuPDF + Tesseract)
+    │
+    ▼
+Text preprocessing
+    │
+    ▼
+Paragraph-first chunking
+    └─ Sliding-window overlap for oversized segments
+    │
+    ▼
+OpenAI text embeddings
+    │
+    ▼
+PostgreSQL + pgvector
+    │
+    ▼
+User-scoped similarity retrieval
+    │
+    ▼
+Context-grounded LLM answer + source identifiers
+```
 
-## Capabilities
+</details>
 
-### Available in the public repository
+## Core Capabilities
 
-| Feature | Implementation |
+### 01 · LLM Agent & Tool Calling
+
+An LLM-driven interaction layer interprets user instructions and selects backend operations such as task creation, listing, and updating.
+
+**Key design:** the model proposes the tool and its arguments; **the backend executes the action** under the authenticated user's context. The LLM does not directly access the database.
+
+- OpenAI Responses API integration
+- Natural-language-driven task operations
+- Function/tool calling and streamed responses
+- Backend-side validation and user authorization
+- Idempotency handling for task creation requests
+
+### 02 · Retrieval-Augmented Generation (RAG)
+
+The knowledge assistant answers user questions using retrieved document passages instead of relying solely on the model's general knowledge.
+
+- OpenAI `text-embedding-3-small` embeddings
+- 1,536-dimensional vectors stored using `pgvector`
+- Cosine-distance semantic retrieval in PostgreSQL
+- User-owned and shared-document access filtering
+- Paragraph-first document chunking and overlap for long segments
+- Context-grounded prompts with `Chunk ID` / `Source ID`
+- Similarity threshold and explicit no-evidence abstention behavior
+- API responses including answer text and retrieved chunk identifiers
+
+> [!NOTE]
+> Source attribution and prompt grounding **reduce risk**, but do not guarantee factual correctness. The system does not claim strict model-generated citation validation or zero hallucinations.
+
+### 03 · PDF Parsing, OCR & Document Ingestion
+
+A document processing layer supports both machine-readable PDFs and image-based scanned documents.
+
+- **Text extraction:** pypdf
+- **OCR fallback:** PyMuPDF page rendering + Tesseract
+- **Preprocessing:** extracted text normalization and basic cleanup
+- **Chunking:** paragraph-first segmentation with fixed-size overlap for long text
+- **Indexing:** embeddings and vector records stored in PostgreSQL
+- **Document replacement:** re-indexing can replace earlier chunks belonging to the same user and source
+
+### 04 · Asynchronous Processing with Redis & RQ
+
+Expensive PDF ingestion is decoupled from the HTTP request lifecycle.
+
+```text
+POST /ai/documents/upload-async
+             │
+             ▼
+      Return 202 + job_id
+             │
+             ▼
+          Redis / RQ
+             │
+             ▼
+      Dedicated RQ worker
+             │
+             ▼
+  Parse → OCR → Chunk → Embed → Index
+             │
+             ▼
+GET /ai/document-jobs/{job_id}
+```
+
+The status endpoint verifies job ownership before exposing processing state. This architecture improves **request responsiveness**; it does not imply that end-to-end PDF processing finishes faster.
+
+### 05 · Security, Data Integrity & Idempotency
+
+| Concern | Implementation |
 | :--- | :--- |
-| **Account lifecycle** | Registration, login, `GET /me` |
-| **Protected task API** | Create, list, update, and delete user-owned tasks |
-| **User isolation** | Queries scoped to the authenticated user; cross-user update/delete tests |
-| **Typed contracts** | Pydantic request and response models |
-| **Database evolution** | Versioned Alembic migrations |
-| **Integration testing** | pytest, FastAPI TestClient, isolated test DB |
-| **Containerization** | Docker Compose API + PostgreSQL services |
-| **CI** | GitHub Actions runs tests against PostgreSQL |
+| **Authentication** | JWT bearer tokens and Argon2 password hashing |
+| **Authorization** | User-scoped task records and document retrieval |
+| **Schema validation** | Pydantic request/response models |
+| **Database transactions** | SQLAlchemy sessions and explicit commit/rollback |
+| **Duplicate task creation** | Idempotency keys and a database uniqueness constraint |
+| **Concurrent writes** | `IntegrityError` recovery path for duplicate tool executions |
+| **Schema migrations** | Version-controlled Alembic migrations |
 
-### Implemented locally — source sync pending
+## Technology Stack
 
-| Feature | Design |
+| Category | Stack |
 | :--- | :--- |
-| **LLM task agent** | Natural-language task operations via backend tool execution |
-| **Streaming model responses** | Incremental response delivery using the OpenAI API |
-| **Tool-call idempotency** | Operation keys, uniqueness constraints, and transaction conflict handling |
-| **Document Q&A** | Embedding-based retrieval with pgvector and grounded answer generation |
-| **Source attribution** | Source/Chunk identifiers supplied as retrieval evidence |
-| **Abstention handling** | Similarity filtering and no-evidence fallback |
-| **PDF ingestion** | Text-first PDF extraction with OCR fallback for scanned pages |
-| **Async indexing** | Redis/RQ queue, isolated worker, `202 Accepted`, and job status polling |
-
-**Accuracy note:** The local RAG flow uses *paragraph-first* chunking with overlap for oversized segments. **Structure-aware / heading-aware chunking, strict citation validation, and retrieval benchmark improvements are not claimed as completed features.**
+| **Language & API** | Python, FastAPI, Pydantic |
+| **LLM integration** | OpenAI Responses API, Function Calling, streaming |
+| **RAG** | Embeddings, custom retrieval pipeline, PostgreSQL + pgvector |
+| **Document processing** | pypdf, PyMuPDF, Tesseract OCR |
+| **Background jobs** | Redis, RQ, Worker |
+| **Persistence** | PostgreSQL 18, SQLAlchemy, psycopg |
+| **Authentication** | JWT, Argon2 |
+| **Infrastructure** | Docker, Docker Compose, uv |
+| **Testing & CI** | pytest, FastAPI TestClient, GitHub Actions |
 
 ## Quick Start
 
 ### Prerequisites
 
-- [Docker Desktop](https://www.docker.com/products/docker-desktop/) with Docker Compose
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/) and Docker Compose
 - Git
-- Optional: [uv](https://docs.astral.sh/uv/) for development outside containers
+- An OpenAI API key for agent and embedding features
+- Tesseract OCR available in the runtime handling scanned PDFs
 
-### 1. Clone
+### 1. Clone the repository
 
 ```bash
 git clone https://github.com/EighthhDayy/ai-task-manager.git
 cd ai-task-manager
 ```
 
-### 2. Configure environment
+### 2. Create a `.env` file
 
-Create a `.env` file in the repository root:
+Create a local `.env` file in the project root:
 
 ```dotenv
+# PostgreSQL
 DB_USER=app_user
-DB_PASSWORD=change-this-to-a-strong-password
+DB_PASSWORD=replace-with-a-secure-password
 DB_NAME=ai_task_manager
-DB_HOST=localhost
+DB_HOST=db
 DB_PORT=5432
+
+# Authentication
 SECRET_KEY=replace-with-a-long-random-secret
+
+# LLM / Embeddings
+OPENAI_API_KEY=your-openai-api-key
+
+# Background jobs
+REDIS_URL=redis://redis:6379/0
 ```
 
-> The Docker Compose configuration sets the API container's database host to `db`. Keep real credentials out of source control; `.env` is ignored by Git.
+Keep credentials out of version control. In a non-container environment, use the database and Redis host addresses appropriate for that runtime.
 
-### 3. Account for the current public snapshot
-
-The current `main.py` imports `ai_task_manager.routers.ai`, but that file is not on the public branch yet. **Until the AI module is synchronized**, use a **temporary local core-only edit**:
-
-```python
-# In main.py, use the routers that are currently committed:
-from ai_task_manager.routers import tasks, users
-
-# Keep the two committed router registrations:
-app.include_router(tasks.router)
-app.include_router(users.router)
-
-# Temporarily remove / comment:
-# app.include_router(ai.router)
-```
-
-This workaround is only for the **current public snapshot** and is not necessary in the complete local AI development version.
-
-### 4. Launch the core backend
+### 3. Start the application stack
 
 ```bash
 docker compose up --build -d
+```
+
+The containerized stack consists of an **API**, **PostgreSQL/pgvector**, **Redis**, and a **background worker**.
+
+Apply database migrations as appropriate for the initialized database:
+
+```bash
 docker compose exec api uv run --no-sync alembic -c src/ai_task_manager/alembic.ini upgrade head
 ```
 
-After startup:
+### 4. Open the API
 
-| Resource | URL |
+| Service | Address |
 | :--- | :--- |
-| Interactive API documentation | [http://localhost:8000/docs](http://localhost:8000/docs) |
-| OpenAPI specification | [http://localhost:8000/openapi.json](http://localhost:8000/openapi.json) |
-| Health-style root response | [http://localhost:8000/](http://localhost:8000/) |
+| Interactive OpenAPI / Swagger UI | [http://localhost:8000/docs](http://localhost:8000/docs) |
+| OpenAPI JSON | [http://localhost:8000/openapi.json](http://localhost:8000/openapi.json) |
+| API root | [http://localhost:8000/](http://localhost:8000/) |
 
-> [!NOTE]
-> The `/` endpoint is a basic status response, **not** a comprehensive dependency health check. For the local AI extensions, additional Redis, Worker, vector database, OCR, and API-key configuration is required.
+> **Tip:** Use Swagger UI to register, log in, authorize with a bearer token, create tasks, upload documents, and test document Q&A.
+
+> **Security:** Do not use the example credentials in production. Configure real secrets, appropriate database permissions, TLS, and restrictive network access before any public deployment.
 
 ## API Reference
 
-The committed backend exposes the following endpoints:
+### Authentication & Task Management
 
-| Method | Endpoint | Purpose | Authentication |
-| :--- | :--- | :--- | :--- |
-| `POST` | `/users` | Register a user | No |
-| `POST` | `/login` | Obtain JWT access token | No |
-| `GET` | `/me` | Get current user | Bearer |
-| `GET` | `/my/tasks` | List own tasks | Bearer |
-| `POST` | `/my/tasks` | Create a task | Bearer |
-| `PATCH` | `/my/tasks/{task_id}` | Update own task | Bearer |
-| `DELETE` | `/my/tasks/{task_id}` | Delete own task | Bearer |
-| `GET` | `/` | Basic API status | No |
+| Method | Endpoint | Description |
+| :--- | :--- | :--- |
+| `POST` | `/users` | Register an account |
+| `POST` | `/login` | Log in and obtain a JWT |
+| `GET` | `/me` | Return the authenticated user |
+| `GET` | `/my/tasks` | List the user's tasks |
+| `POST` | `/my/tasks` | Create a task |
+| `PATCH` | `/my/tasks/{task_id}` | Update a task |
+| `DELETE` | `/my/tasks/{task_id}` | Delete a task |
+
+### Document Intelligence
+
+| Method | Endpoint | Description |
+| :--- | :--- | :--- |
+| `POST` | `/ai/documents` | Index a text document |
+| `POST` | `/ai/documents/upload` | Upload and process a PDF |
+| `POST` | `/ai/documents/upload-async` | Enqueue PDF ingestion and return job ID |
+| `GET` | `/ai/document-jobs/{job_id}` | Check an async processing job |
+| `POST` | `/ai/ask-docs` | Ask questions over indexed documents |
+
+The Agent's tool-calling workflow also supports natural-language task operations. For the complete route definitions and current request schemas, use `/docs`.
 
 <details>
-<summary><strong>Example: create and retrieve tasks</strong></summary>
+<summary><strong>Example API flow — create a task</strong></summary>
 
-**1. Register**
+**Register**
 
 ```bash
 curl -X POST http://localhost:8000/users \
   -H "Content-Type: application/json" \
-  -d '{"username":"demo","email":"demo@example.com","password":"your-password"}'
+  -d '{"username":"demo","email":"demo@example.com","password":"choose-a-secure-password"}'
 ```
 
-**2. Log in**
+**Log in**
 
 ```bash
 curl -X POST http://localhost:8000/login \
   -H "Content-Type: application/json" \
-  -d '{"username":"demo","password":"your-password"}'
+  -d '{"username":"demo","password":"choose-a-secure-password"}'
 ```
 
-Copy the returned `access_token`.
+Copy the `access_token` from the response.
 
-**3. Create a task**
+**Create a task**
 
 ```bash
 curl -X POST http://localhost:8000/my/tasks \
   -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
   -H "Content-Type: application/json" \
-  -d '{"title":"Review RAG architecture","description":"Document retrieval pipeline","completed":false}'
+  -d '{"title":"Review RAG architecture","completed":false,"description":"Prepare technical notes"}'
 ```
 
-**4. List your tasks**
+**Query tasks**
 
 ```bash
 curl http://localhost:8000/my/tasks \
@@ -278,84 +363,94 @@ curl http://localhost:8000/my/tasks \
 
 </details>
 
-## Engineering Decisions
+## Engineering Highlights
 
-A strong backend is defined as much by its **failure handling and data boundaries** as by its happy path.
+### Grounded generation instead of unrestricted answers
 
-| Concern | Design decision |
-| :--- | :--- |
-| **Authorization** | Validate bearer tokens and filter task queries by the authenticated user's ID |
-| **Password safety** | Store Argon2 password hashes rather than plaintext credentials |
-| **Data integrity** | Enforce username/email uniqueness and return `409 Conflict` for duplicates |
-| **Schema evolution** | Manage database changes through versioned Alembic migrations |
-| **Testability** | Replace database dependencies in integration tests and verify cross-user access controls |
-| **Duplicate agent actions** *(local)* | Use an idempotency key and DB uniqueness guarantee to prevent duplicate creates |
-| **Long-running ingestion** *(local)* | Queue document processing outside the HTTP request lifecycle |
-| **Evidence-based answers** *(local)* | Ground generation in retrieved passages and include source identifiers |
+The RAG flow retrieves a small number of relevant chunks, injects source identifiers into model context, and instructs the model to answer from the evidence. When retrieval yields no sufficiently relevant chunks, the API can return a no-evidence response without generating an unsupported answer.
 
-### Testing and CI
+### Idempotent business operations
 
-The repository includes a pytest suite covering registration, login, protected task CRUD, persistence, and user-isolation scenarios.
+An agent may retry a tool call after a timeout or repeat an operation. The task-creation flow associates the logical action with an idempotency key; the database uniqueness constraint and transaction-level conflict recovery prevent duplicate records for repeated requests using the same key.
+
+### Responsive document APIs
+
+The async upload endpoint acknowledges document submission with `202 Accepted` and a job ID. Redis/RQ executes OCR, chunking, embeddings, and indexing in a separate worker. Clients can poll the ownership-checked job status endpoint.
+
+### Explicit engineering boundaries
+
+- API-layer authentication does not replace row-level user-scoped queries.
+- Returning retrieved source identifiers is not the same as validating every generated citation.
+- Idempotent tool-based task creation does not automatically make every `POST` endpoint idempotent.
+- Structure-aware chunking and retrieval performance gains require implementation and evaluation before they can be claimed.
+
+## Testing & CI
+
+The project uses **pytest** and FastAPI's **TestClient** for API integration testing, including authentication, task CRUD, database persistence, and cross-user authorization checks.
 
 ```bash
-# Requires an accessible PostgreSQL test database:
-# ai_task_manager_test, with DB_* and SECRET_KEY configured.
 uv sync --frozen
 uv run pytest
 ```
 
-GitHub Actions defines a PostgreSQL 18 service for CI and runs the suite on pushes and pull requests.
+The test suite requires an isolated PostgreSQL test database and matching environment variables. The GitHub Actions workflow runs the tests with PostgreSQL as a service.
 
-> Test coverage percentages, latency improvements, hallucination-reduction scores, and retrieval metrics are intentionally **not published without reproducible measurements**.
+**No invented benchmarks:** latency improvements, hallucination reduction rates, and retrieval quality scores are intentionally omitted until supported by reproducible evaluation.
 
-## Project Layout
+## Project Structure
 
 ```text
 ai-task-manager/
-├── .github/workflows/ci.yml       # PostgreSQL-backed CI tests
-├── main.py                        # FastAPI application entry point
+├── .github/workflows/ci.yml
+├── main.py
 ├── src/ai_task_manager/
-│   ├── auth.py                    # JWT, passwords, current user
-│   ├── database.py                # Engine and session lifecycle
-│   ├── models.py                  # SQLAlchemy ORM models
-│   ├── schemas.py                 # Pydantic contracts
-│   ├── routers/
-│   │   ├── users.py               # Registration, login, profile
-│   │   └── tasks.py               # User-scoped CRUD
-│   └── alembic/                  # Versioned migrations
-├── tests/                         # Integration tests and fixtures
+│   ├── auth.py                   # JWT, password verification, auth dependencies
+│   ├── database.py               # SQLAlchemy engine / database sessions
+│   ├── models.py                 # Task, user, document persistence models
+│   ├── schemas.py                # Pydantic request and response contracts
+│   ├── llm.py                    # OpenAI client integration
+│   ├── rag.py                    # Embeddings, retrieval, grounded QA
+│   ├── chunking.py               # Paragraph-first text splitting
+│   ├── ingestion.py              # Chunk generation and indexing
+│   ├── pdf_utils.py              # PDF extraction and OCR
+│   ├── queue_config.py           # Redis / RQ configuration
+│   ├── document_jobs.py          # Background ingestion worker
+│   ├── routers/                  # Auth, task, and AI endpoints
+│   └── alembic/                  # Database migrations
+├── tests/                         # API integration tests
 ├── Dockerfile
 ├── compose.yaml
 ├── pyproject.toml
 └── uv.lock
 ```
 
-*Tree reflects files currently present on the public branch; local AI modules are not listed as committed files.*
-
 ## Roadmap
 
-- [x] Authenticated FastAPI backend with PostgreSQL persistence
-- [x] JWT-protected user-scoped task CRUD
-- [x] SQLAlchemy models and Alembic migrations
-- [x] Docker Compose and PostgreSQL-backed CI
-- [x] Local LLM tool-calling and streamed responses
-- [x] Local RAG, PDF/OCR ingestion, and Redis/RQ jobs
-- [ ] Sync AI extensions and integration tests to the public repository
-- [ ] Add heading-aware / structure-aware document chunking
-- [ ] Add structured citation validation and RAG evaluation datasets
-- [ ] Benchmark retrieval quality, job latency, and reliability under load
-- [ ] Provide screenshots and a reproducible end-to-end AI demo
+- [x] Authenticated task management with PostgreSQL
+- [x] LLM Function Calling and streaming responses
+- [x] Document RAG with embeddings and pgvector
+- [x] PDF text extraction and OCR fallback
+- [x] Redis/RQ asynchronous document indexing
+- [x] Task-creation idempotency and concurrency conflict handling
+- [x] Docker-based multi-service architecture
+- [ ] Heading-aware / structure-aware document chunking
+- [ ] Automated citation validation and stronger structured model output checks
+- [ ] Retrieval quality evaluation (Hit@2, Recall@K, MRR)
+- [ ] Load testing and reliability hardening for concurrent ingestion
+- [ ] Demo screenshots and deployment walkthrough
 
 ---
 
 <div align="center">
 
-**Built with Python, grounded in backend engineering, and extended toward reliable agentic systems.**
+### Built beyond the chatbot.
 
-<sub>Designed and developed as an independent engineering project.</sub>
+**Designed to connect LLM reasoning, retrieval, and actual backend operations.**
+
+<sub>Independent project · Python / FastAPI / LLM Systems Engineering</sub>
 
 <br /><br />
 
-[Back to top ↑](#-ai-task-manager)
+[↑ Back to top](#-ai-task-manager)
 
 </div>
