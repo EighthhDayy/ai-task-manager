@@ -37,7 +37,7 @@ The public repository establishes a Python/FastAPI foundation with **JWT authent
 Beyond the public snapshot, the project has been extended locally with an **LLM tool-calling agent**, a **document RAG pipeline**, **PDF/OCR ingestion**, and **Redis/RQ background workers**.
 
 > [!IMPORTANT]
-> **Repository synchronization status:** The public \`main\` branch currently contains the **core backend snapshot**. The advanced AI modules described as *local* below have been implemented and exercised in local development, but their latest source files have **not yet been pushed to \`main\`**. In addition, the current committed \`main.py\` references an \`ai\` router that is not yet committed; see [Quick Start](#quick-start) for the core-only workaround. Features marked *planned* are design goals, not completed work.
+> **Repository synchronization status:** The public `main` branch currently contains the **core backend snapshot**. The advanced AI modules described as *local* below have been implemented and exercised in local development, but their latest source files have **not yet been pushed to `main`**. In addition, the current committed `main.py` references an `ai` router that is not yet committed; see [Quick Start](#quick-start) for the core-only workaround. Features marked *planned* are design goals, not completed work.
 
 ## At a glance
 
@@ -80,7 +80,7 @@ SQLAlchemy transactions, Alembic migrations, Dockerized services, pytest integra
 
 **Architecture overview** — solid lines represent the public core; dashed lines lead to AI modules developed locally and awaiting repository synchronization.
 
-\`\`\`mermaid
+```mermaid
 flowchart TB
     Client["Client / Swagger UI"] --> API["FastAPI · REST API"]
 
@@ -113,16 +113,16 @@ flowchart TB
     classDef local fill:#eef2ff,stroke:#6574cd,color:#25346b;
     class API,Auth,Tasks,Postgres core;
     class Agent,Ops,Upload,Queue,Worker,Parse,Chunk,Embed,Vector,Retrieval,Answer local;
-\`\`\`
+```
 
 ### Technology stack
 
 | Layer | Technologies | Scope |
 | :--- | :--- | :--- |
-| API & validation | Python 3.13+, FastAPI, Pydantic | Public \`main\` |
-| Authentication | JWT, HTTP Bearer, Argon2 | Public \`main\` |
-| Persistence | PostgreSQL 18, SQLAlchemy, psycopg, Alembic | Public \`main\` |
-| Delivery & testing | Docker Compose, uv, pytest, GitHub Actions | Public \`main\` |
+| API & validation | Python 3.13+, FastAPI, Pydantic | Public `main` |
+| Authentication | JWT, HTTP Bearer, Argon2 | Public `main` |
+| Persistence | PostgreSQL 18, SQLAlchemy, psycopg, Alembic | Public `main` |
+| Delivery & testing | Docker Compose, uv, pytest, GitHub Actions | Public `main` |
 | LLM orchestration | OpenAI Responses API, tool calling, streaming | Local development |
 | Retrieval | Embeddings, PostgreSQL + pgvector, context-grounded QA | Local development |
 | Document processing | pypdf, PyMuPDF, Tesseract OCR | Local development |
@@ -134,7 +134,7 @@ flowchart TB
 
 | Feature | Implementation |
 | :--- | :--- |
-| **Account lifecycle** | Registration, login, \`GET /me\` |
+| **Account lifecycle** | Registration, login, `GET /me` |
 | **Protected task API** | Create, list, update, and delete user-owned tasks |
 | **User isolation** | Queries scoped to the authenticated user; cross-user update/delete tests |
 | **Typed contracts** | Pydantic request and response models |
@@ -154,7 +154,7 @@ flowchart TB
 | **Source attribution** | Source/Chunk identifiers supplied as retrieval evidence |
 | **Abstention handling** | Similarity filtering and no-evidence fallback |
 | **PDF ingestion** | Text-first PDF extraction with OCR fallback for scanned pages |
-| **Async indexing** | Redis/RQ queue, isolated worker, \`202 Accepted\`, and job status polling |
+| **Async indexing** | Redis/RQ queue, isolated worker, `202 Accepted`, and job status polling |
 
 **Accuracy note:** The local RAG flow uses *paragraph-first* chunking with overlap for oversized segments. **Structure-aware / heading-aware chunking, strict citation validation, and retrieval benchmark improvements are not claimed as completed features.**
 
@@ -168,31 +168,31 @@ flowchart TB
 
 ### 1. Clone
 
-\`\`\`bash
+```bash
 git clone https://github.com/EighthhDayy/ai-task-manager.git
 cd ai-task-manager
-\`\`\`
+```
 
 ### 2. Configure environment
 
-Create a \`.env\` file in the repository root:
+Create a `.env` file in the repository root:
 
-\`\`\`dotenv
+```dotenv
 DB_USER=app_user
 DB_PASSWORD=change-this-to-a-strong-password
 DB_NAME=ai_task_manager
 DB_HOST=localhost
 DB_PORT=5432
 SECRET_KEY=replace-with-a-long-random-secret
-\`\`\`
+```
 
-> The Docker Compose configuration sets the API container's database host to \`db\`. Keep real credentials out of source control; \`.env\` is ignored by Git.
+> The Docker Compose configuration sets the API container's database host to `db`. Keep real credentials out of source control; `.env` is ignored by Git.
 
 ### 3. Account for the current public snapshot
 
-The current \`main.py\` imports \`ai_task_manager.routers.ai\`, but that file is not on the public branch yet. **Until the AI module is synchronized**, use a **temporary local core-only edit**:
+The current `main.py` imports `ai_task_manager.routers.ai`, but that file is not on the public branch yet. **Until the AI module is synchronized**, use a **temporary local core-only edit**:
 
-\`\`\`python
+```python
 # In main.py, use the routers that are currently committed:
 from ai_task_manager.routers import tasks, users
 
@@ -202,16 +202,16 @@ app.include_router(users.router)
 
 # Temporarily remove / comment:
 # app.include_router(ai.router)
-\`\`\`
+```
 
 This workaround is only for the **current public snapshot** and is not necessary in the complete local AI development version.
 
 ### 4. Launch the core backend
 
-\`\`\`bash
+```bash
 docker compose up --build -d
 docker compose exec api uv run --no-sync alembic -c src/ai_task_manager/alembic.ini upgrade head
-\`\`\`
+```
 
 After startup:
 
@@ -222,7 +222,7 @@ After startup:
 | Health-style root response | [http://localhost:8000/](http://localhost:8000/) |
 
 > [!NOTE]
-> The \`/\` endpoint is a basic status response, **not** a comprehensive dependency health check. For the local AI extensions, additional Redis, Worker, vector database, OCR, and API-key configuration is required.
+> The `/` endpoint is a basic status response, **not** a comprehensive dependency health check. For the local AI extensions, additional Redis, Worker, vector database, OCR, and API-key configuration is required.
 
 ## API Reference
 
@@ -230,51 +230,51 @@ The committed backend exposes the following endpoints:
 
 | Method | Endpoint | Purpose | Authentication |
 | :--- | :--- | :--- | :--- |
-| \`POST\` | \`/users\` | Register a user | No |
-| \`POST\` | \`/login\` | Obtain JWT access token | No |
-| \`GET\` | \`/me\` | Get current user | Bearer |
-| \`GET\` | \`/my/tasks\` | List own tasks | Bearer |
-| \`POST\` | \`/my/tasks\` | Create a task | Bearer |
-| \`PATCH\` | \`/my/tasks/{task_id}\` | Update own task | Bearer |
-| \`DELETE\` | \`/my/tasks/{task_id}\` | Delete own task | Bearer |
-| \`GET\` | \`/\` | Basic API status | No |
+| `POST` | `/users` | Register a user | No |
+| `POST` | `/login` | Obtain JWT access token | No |
+| `GET` | `/me` | Get current user | Bearer |
+| `GET` | `/my/tasks` | List own tasks | Bearer |
+| `POST` | `/my/tasks` | Create a task | Bearer |
+| `PATCH` | `/my/tasks/{task_id}` | Update own task | Bearer |
+| `DELETE` | `/my/tasks/{task_id}` | Delete own task | Bearer |
+| `GET` | `/` | Basic API status | No |
 
 <details>
 <summary><strong>Example: create and retrieve tasks</strong></summary>
 
 **1. Register**
 
-\`\`\`bash
+```bash
 curl -X POST http://localhost:8000/users \
   -H "Content-Type: application/json" \
   -d '{"username":"demo","email":"demo@example.com","password":"your-password"}'
-\`\`\`
+```
 
 **2. Log in**
 
-\`\`\`bash
+```bash
 curl -X POST http://localhost:8000/login \
   -H "Content-Type: application/json" \
   -d '{"username":"demo","password":"your-password"}'
-\`\`\`
+```
 
-Copy the returned \`access_token\`.
+Copy the returned `access_token`.
 
 **3. Create a task**
 
-\`\`\`bash
+```bash
 curl -X POST http://localhost:8000/my/tasks \
   -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"title":"Review RAG architecture","description":"Document retrieval pipeline","completed":false}'
-\`\`\`
+```
 
 **4. List your tasks**
 
-\`\`\`bash
+```bash
 curl http://localhost:8000/my/tasks \
   -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
-\`\`\`
+```
 
 </details>
 
@@ -286,7 +286,7 @@ A strong backend is defined as much by its **failure handling and data boundarie
 | :--- | :--- |
 | **Authorization** | Validate bearer tokens and filter task queries by the authenticated user's ID |
 | **Password safety** | Store Argon2 password hashes rather than plaintext credentials |
-| **Data integrity** | Enforce username/email uniqueness and return \`409 Conflict\` for duplicates |
+| **Data integrity** | Enforce username/email uniqueness and return `409 Conflict` for duplicates |
 | **Schema evolution** | Manage database changes through versioned Alembic migrations |
 | **Testability** | Replace database dependencies in integration tests and verify cross-user access controls |
 | **Duplicate agent actions** *(local)* | Use an idempotency key and DB uniqueness guarantee to prevent duplicate creates |
@@ -297,12 +297,12 @@ A strong backend is defined as much by its **failure handling and data boundarie
 
 The repository includes a pytest suite covering registration, login, protected task CRUD, persistence, and user-isolation scenarios.
 
-\`\`\`bash
+```bash
 # Requires an accessible PostgreSQL test database:
 # ai_task_manager_test, with DB_* and SECRET_KEY configured.
 uv sync --frozen
 uv run pytest
-\`\`\`
+```
 
 GitHub Actions defines a PostgreSQL 18 service for CI and runs the suite on pushes and pull requests.
 
@@ -310,7 +310,7 @@ GitHub Actions defines a PostgreSQL 18 service for CI and runs the suite on push
 
 ## Project Layout
 
-\`\`\`text
+```text
 ai-task-manager/
 ├── .github/workflows/ci.yml       # PostgreSQL-backed CI tests
 ├── main.py                        # FastAPI application entry point
@@ -328,7 +328,7 @@ ai-task-manager/
 ├── compose.yaml
 ├── pyproject.toml
 └── uv.lock
-\`\`\`
+```
 
 *Tree reflects files currently present on the public branch; local AI modules are not listed as committed files.*
 
