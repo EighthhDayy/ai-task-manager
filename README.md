@@ -122,8 +122,12 @@ PDF upload
 Text preprocessing
     │
     ▼
-Paragraph-first chunking
-    └─ Sliding-window overlap for oversized segments
+Structure-aware Chunking Pipeline (planned upgrade)
+    ├─ Regex-based heading detection (Python re)
+    ├─ Section hierarchy & boundary detection
+    ├─ Paragraph-first chunking within sections
+    ├─ Sliding-window overlap for oversized text
+    └─ Preserve heading context in each chunk
     │
     ▼
 OpenAI text embeddings
