@@ -70,7 +70,7 @@ Instead of stopping at a chatbot demo, the project combines **natural-language t
 
 ```mermaid
 flowchart TB
-    U["Client / Swagger UI"] --> API["FastAPI API Layer"]
+    U["Client"] --> API["FastAPI API Layer"]
 
     subgraph App["Application & Security"]
         API --> Auth["JWT Auth · Pydantic Validation"]
