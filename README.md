@@ -434,10 +434,10 @@ ai-task-manager/
 - [x] Redis/RQ asynchronous document indexing
 - [x] Task-creation idempotency and concurrency conflict handling
 - [x] Docker-based multi-service architecture
-- [ ] Heading-aware / structure-aware document chunking
-- [ ] Automated citation validation and stronger structured model output checks
-- [ ] Retrieval quality evaluation (Hit@2, Recall@K, MRR)
-- [ ] Load testing and reliability hardening for concurrent ingestion
+- [x] Heading-aware / structure-aware document chunking
+- [x] Automated citation validation and stronger structured model output checks
+- [x] Retrieval quality evaluation (Hit@2, Recall@K, MRR)
+- [x] Load testing and reliability hardening for concurrent ingestion
 - [ ] Demo screenshots and deployment walkthrough
 
 ---
