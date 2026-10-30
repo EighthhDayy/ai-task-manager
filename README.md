@@ -206,7 +206,6 @@ POST /ai/documents/upload-async
 GET /ai/document-jobs/{job_id}
 ```
 
-The status endpoint verifies job ownership before exposing processing state. This architecture improves **request responsiveness**; it does not imply that end-to-end PDF processing finishes faster.
 
 ### 05 · Security, Data Integrity & Idempotency
 
