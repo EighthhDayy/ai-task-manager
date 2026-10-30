@@ -296,7 +296,6 @@ docker compose exec api uv run --no-sync alembic -c src/ai_task_manager/alembic.
 | OpenAPI JSON | [http://localhost:8000/openapi.json](http://localhost:8000/openapi.json) |
 | API root | [http://localhost:8000/](http://localhost:8000/) |
 
-> **Tip:** Use Swagger UI to register, log in, authorize with a bearer token, create tasks, upload documents, and test document Q&A.
 
 > **Security:** Do not use the example credentials in production. Configure real secrets, appropriate database permissions, TLS, and restrictive network access before any public deployment.
 
