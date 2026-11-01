@@ -395,8 +395,6 @@ uv run pytest
 
 The test suite requires an isolated PostgreSQL test database and matching environment variables. The GitHub Actions workflow runs the tests with PostgreSQL as a service.
 
-**No invented benchmarks:** latency improvements, hallucination reduction rates, and retrieval quality scores are intentionally omitted until supported by reproducible evaluation.
-
 ## Project Structure
 
 ```text
