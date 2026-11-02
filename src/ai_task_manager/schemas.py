@@ -28,7 +28,7 @@ class UserResponse(BaseModel):
     id: int
     username: str
 
-    model_config = ConfigDict(from_attributes=True)  # 你拿到的数据不一定是 dict，也可能是一个 ORM 对象，请允许通过“属性”读取字段。
+    model_config = ConfigDict(from_attributes=True)  # 拿到的数据不一定是 dict，也可能是一个 ORM 对象，请允许通过“属性”读取字段。
 
 class TaskResponse(BaseModel):
     id: int
