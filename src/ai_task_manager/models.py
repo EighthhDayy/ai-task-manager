@@ -1,6 +1,6 @@
 # 本文件描述数据库里的表长什么样
 
-from sqlalchemy.orm import DeclarativeBase   # 是 SQLAlchemy 提供的一个基类
+from sqlalchemy.orm import DeclarativeBase   # SQLAlchemy 提供的一个基类
 
 from sqlalchemy import Integer, Text, Boolean, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column
@@ -16,7 +16,6 @@ from sqlalchemy.orm import (
 class Base(DeclarativeBase):  # Base继承DeclarativeBase，就获得了 SQLAlchemy ORM 需要的一套能力
     pass
 
-# Python class 是数据库表结构的一份 Python 描述
 class Task(Base):
     __tablename__ = "tasks"
 
@@ -76,7 +75,7 @@ class User(Base):
 
     
     )
-    tasks: Mapped[list["Task"]] = relationship(     # tasks是User这个class下面定义的一个属性，之所以是复数，因为一个用户可以有多个task
+    tasks: Mapped[list["Task"]] = relationship(     # tasks是User这个class下面定义的一个属性，复数：因为一个用户可以有多个task
                                                         # relationship()→ Python ORM 对象之间的关系
             back_populates="user" )                      # "user" 指的是另一边 Task class 里的属性名字
 
