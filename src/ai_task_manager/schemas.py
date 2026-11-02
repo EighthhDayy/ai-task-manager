@@ -1,8 +1,8 @@
 from pydantic import BaseModel
 from pydantic import BaseModel, ConfigDict
 
-# Pydantic Schema。Pydantic = 用 Python 类来定义数据结构，并自动校验数据是否符合要求。
-class TaskCreate(BaseModel):   # 规定：API 接收到的数据，应该长什么样
+# Pydantic Schema。Pydantic 
+class TaskCreate(BaseModel):  
     title: str
     completed: bool = False
     description: str | None = None
