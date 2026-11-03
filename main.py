@@ -1,10 +1,9 @@
 from fastapi import FastAPI
 from ai_task_manager.routers import tasks, users, ai
-# 创建一个对象，叫app, 创建 FastAPI 应用
+# app：FastAPI 应用
 app = FastAPI()
 
 # 安装 routers
-# 把 tasks.py 里面那个 router 收集的所有 route，安装到这个 FastAPI app 上
 
 app.include_router(tasks.router)
 app.include_router(users.router)
