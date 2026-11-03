@@ -15,9 +15,8 @@ from ai_task_manager.models import Task, User
 router = APIRouter(tags=["Tasks"])
 
 # CRUD——读取
-@router.get("/my/tasks", status_code=200, response_model=list[TaskResponse])        # response_model=TaskResponse 返回的不是列表
-# 去调用 get_current_user，把它的返回值放进 current_user
- # db 这个参数的类型是 Session，FastAPI 去调用 get_db，把得到的数据库 session 放进 db
+@router.get("/my/tasks", status_code=200, response_model=list[TaskResponse])       
+
 def get_my_tasks(
     current_user: User = Depends(get_current_user),  
     db: Session = Depends(get_db)
@@ -27,7 +26,7 @@ def get_my_tasks(
     stmt = (
         select (Task).where(Task.user_id == user_id).order_by(Task.id)
     )
-    tasks = db.scalars(stmt).all()  # tasks是一组 Task 对象。查询出来的每一条结果都会被 SQLAlchemy ORM 变成一个 Task 类的对象
+    tasks = db.scalars(stmt).all()  
     return tasks   # .all()返回的是list[Task]
 
 # CRUD——新增
