@@ -12,8 +12,6 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from jwt.exceptions import ExpiredSignatureError, InvalidTokenError
 
 
-
-
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -92,8 +90,8 @@ def get_current_user(
 
     user_id = int(user_id)
 
-    user = db.get(User, user_id)  # 因为 id 是 primary key
-    # 或者
+    user = db.get(User, user_id)  # id：primary key
+    # or
     # stmt = select(User).where(User.id == user_id)
     # user = db.scalars(stmt).one_or_none()   
 
