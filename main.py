@@ -1,12 +1,23 @@
 from fastapi import FastAPI
-from ai_task_manager.routers import tasks, users, ai
+from ai_task_manager.routers import tasks, transformer_qa, users
+
+# Some checkouts also include the existing documents and agent router.
+try:
+    import ai_task_manager.routers.ai as ai
+except ModuleNotFoundError as exc:
+    if exc.name != "ai_task_manager.routers.ai":
+        raise
+    ai = None
+
 # app：FastAPI 应用
 app = FastAPI()
 
 
 app.include_router(tasks.router)
 app.include_router(users.router)
-app.include_router(ai.router)
+app.include_router(transformer_qa.router)
+if ai is not None:
+    app.include_router(ai.router)
 
 # get， 根路径
 @app.get("/")  
