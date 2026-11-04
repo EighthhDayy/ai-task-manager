@@ -321,6 +321,19 @@ docker compose exec api uv run --no-sync alembic -c src/ai_task_manager/alembic.
 | `POST` | `/ai/documents/upload-async` | Enqueue PDF ingestion and return job ID |
 | `GET` | `/ai/document-jobs/{job_id}` | Check an async processing job |
 | `POST` | `/ai/ask-docs` | Ask questions over indexed documents |
+| `POST` | `/ai/transformer-qa` | Ask QLoRA-adapted Qwen3 a question using English Wikipedia |
+
+#### Wikipedia question answering with Qwen3
+
+Start the inference API from the [Transformer QA project](https://github.com/EighthhDayy/Transformer-Based-Question-Answering-System#qwen3-inference-api), then set `TRANSFORMER_QA_URL` in the Task Manager's environment to the inference service's base URL. Use `http://127.0.0.1:8001` when both processes run directly on the same machine, or `http://host.docker.internal:8001` with Docker Desktop when the inference service runs on the host. Restart the API to load the configuration.
+
+In Swagger, authorize with the JWT and send an English question to `POST /ai/transformer-qa`:
+
+```json
+{"question": "When did Rihanna make her debut?"}
+```
+
+The API fetches Wikipedia articles live, picks a relevant paragraph, and sends the question and paragraph to Qwen3. The response includes `answer`, `model`, and `source_url` for the retrieved article.
 
 The Agent's tool-calling workflow also supports natural-language task operations. For the complete route definitions and current request schemas, use `/docs`.
 
