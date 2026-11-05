@@ -1,7 +1,6 @@
 from fastapi import FastAPI
 from ai_task_manager.routers import tasks, qa, users
 
-# Some checkouts also include the existing documents and agent router.
 try:
     import ai_task_manager.routers.ai as ai
 except ModuleNotFoundError as exc:
