@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from ai_task_manager.routers import tasks, transformer_qa, users
+from ai_task_manager.routers import tasks, qa, users
 
 # Some checkouts also include the existing documents and agent router.
 try:
@@ -15,7 +15,7 @@ app = FastAPI()
 
 app.include_router(tasks.router)
 app.include_router(users.router)
-app.include_router(transformer_qa.router)
+app.include_router(qa.router)
 if ai is not None:
     app.include_router(ai.router)
 
