@@ -7,9 +7,9 @@ from urllib.parse import quote
 import httpx
 from bs4 import BeautifulSoup, SoupStrainer
 from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel, ConfigDict, Field
 
 from ai_task_manager.auth import get_current_user
+from ai_task_manager.schemas import ModelAnswer, TransformerAnswer, TransformerQuestion
 
 router = APIRouter(
     prefix="/ai",
@@ -27,21 +27,6 @@ STOP_WORDS = frozenset(
     "a an and are as at be by did do does for from had has have her his how i in is it "
     "make of on or she that the their they to was were what when where which who why with".split()
 )
-
-
-class TransformerQuestion(BaseModel):
-    model_config = ConfigDict(str_strip_whitespace=True)
-
-    question: str = Field(min_length=1, max_length=400)
-
-
-class ModelAnswer(BaseModel):
-    answer: str
-    model: str
-
-
-class TransformerAnswer(ModelAnswer):
-    source_url: str
 
 
 def wikipedia_passage(client: httpx.Client, question: str) -> tuple[str, str] | None:
