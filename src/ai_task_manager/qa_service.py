@@ -109,7 +109,7 @@ def answer_transformer_question(question: str) -> TransformerAnswer:
                 "No relevant Wikipedia passage was found.",
             )
         context, source_url = result
-
+        # 把问题 question 和检索到的wiki内容交给 Qwen3，再读取返回的答案
         try:
             prediction = client.post(
                 f"{model_url}/predict",
