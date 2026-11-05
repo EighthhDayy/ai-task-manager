@@ -1,5 +1,4 @@
-from pydantic import BaseModel
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 # Pydantic Schema。Pydantic 
 class TaskCreate(BaseModel):  
@@ -38,3 +37,18 @@ class TaskResponse(BaseModel):
     description: str | None
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class TransformerQuestion(BaseModel):
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    question: str = Field(min_length=1, max_length=400)
+
+
+class ModelAnswer(BaseModel):
+    answer: str
+    model: str
+
+
+class TransformerAnswer(ModelAnswer):
+    source_url: str
