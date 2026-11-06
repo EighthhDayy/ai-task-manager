@@ -31,6 +31,13 @@
 
 ## Overview
 
+### MCP task tools
+
+An optional stdio MCP server exposes `list_tasks`, `create_task`, and `complete_task`
+through the existing authenticated REST API. Includes typed schemas, structured output,
+user isolation checks, and a runnable client. See the [MCP setup and demo guide](docs/mcp.md).
+Install with `uv sync --frozen --extra mcp`.
+
 **AI Task Manager** is a full-stack-infrastructure-oriented **AI backend system** that connects large language models to real business operations and private document knowledge.
 
 Instead of stopping at a chatbot demo, the project combines **natural-language task management**, **controlled function execution**, **document-grounded question answering**, and **reliable background processing** in a modular FastAPI service.
