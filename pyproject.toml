@@ -21,6 +21,13 @@ dependencies = [
 
 [project.scripts]
 ai-task-manager = "ai_task_manager:main"
+ai-task-manager-mcp = "ai_task_manager.mcp_server:main"
+ai-task-manager-mcp-client = "ai_task_manager.mcp_client:main"
+
+[project.optional-dependencies]
+mcp = [
+    "mcp>=2,<3",
+]
 
 [build-system]
 requires = ["uv_build>=0.12.17,<0.13.0"]
