@@ -1,7 +1,7 @@
 
 services:
   db:
-    image: postgres:18
+    image: pgvector/pgvector:0.8.6-pg18-trixie
 
     environment:
       POSTGRES_USER: ${DB_USER}
@@ -11,11 +11,54 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql
 
+
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
       interval: 5s
       timeout: 5s
       retries: 10
+
+    ports:
+      - "127.0.0.1:5433:5432"
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "127.0.0.1:6379:6379"
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis_data:/data
+  worker:
+    build: .
+
+    env_file:
+      - .env
+
+    environment:
+      DB_HOST: db
+      DB_PORT: "5432"
+      REDIS_URL: redis://redis:6379/0
+      UPLOAD_DIR: /app/uploads
+
+    volumes:
+      - ./data/uploads:/app/uploads
+
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+
+    command:
+      - uv
+      - run
+      - --no-sync
+      - rq
+      - worker
+      - documents
+      - --url
+      - redis://redis:6379/0
+      - --serializer
+      - json
 
   api:
     build: .
@@ -29,10 +72,18 @@ services:
     environment:
       DB_HOST: db
       DB_PORT: "5432"
+      REDIS_URL: redis://redis:6379/0
+      UPLOAD_DIR: /app/uploads
+
+    volumes:
+      - ./data/uploads:/app/uploads
 
     depends_on:
       db:
         condition: service_healthy
+      redis:
+        condition: service_started
 
 volumes:
   postgres_data:
+  redis_data:
