@@ -4,3 +4,22 @@
 __pycache__/
 .pytest_cache/
 *.pyc
+data/uploads/
+# Frontend dependencies
+**/node_modules
+
+# Python virtual environments
+.venv
+**/.venv
+
+# Cache and generated files
+**/__pycache__
+**/.pytest_cache
+frontend/dist
+
+# Git metadata
+.git
+
+# Local environment secrets
+.env
+.env.*

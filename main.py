@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from ai_task_manager.routers import tasks, users, ai
+from ai_task_manager.routers import tasks, users, ai, qa
 # 创建一个对象，叫app, 创建 FastAPI 应用
 app = FastAPI()
 
@@ -9,6 +9,7 @@ app = FastAPI()
 app.include_router(tasks.router)
 app.include_router(users.router)
 app.include_router(ai.router)
+app.include_router(qa.router)
 
 # get
 @app.get("/")  # 根路径
