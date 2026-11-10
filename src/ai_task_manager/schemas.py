@@ -1,6 +1,7 @@
-from pydantic import BaseModel, ConfigDict, Field
-
+from datetime import datetime
 from uuid import UUID
+
+from pydantic import BaseModel, ConfigDict, Field
 
 # Pydantic Schema。Pydantic = 用 Python 类来定义数据结构，并自动校验数据是否符合要求。
 class TaskCreate(BaseModel):   # 规定：API 接收到的数据，应该长什么样
@@ -64,9 +65,19 @@ class AgentRequest(BaseModel):
 class AskDocsRequest(BaseModel):
     question:str
 
+
+class RagSource(BaseModel):
+    chunk_id: str
+    source_id: str
+    filename: str | None
+    page_number: int | None
+    text: str
+
+
 class AskDocsResponse(BaseModel):
     answer:str
     retrieved_chunk_ids: list[str]
+    sources: list[RagSource]
 
 
 class IndexDocumentRequest(BaseModel):
@@ -77,6 +88,13 @@ class IndexDocumentRequest(BaseModel):
 class IndexDocumentResponse(BaseModel):
     source_id: str
     chunk_count: int
+
+
+class DocumentSummary(IndexDocumentResponse):
+    id: int
+    filename: str | None
+    indexed_at: datetime | None
+
 
 # Qwen问题及回答的schema
 class TransformerQuestion(BaseModel):

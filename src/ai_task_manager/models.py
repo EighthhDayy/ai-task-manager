@@ -1,8 +1,11 @@
 # 本文件描述数据库里的表长什么样
 
-from sqlalchemy.orm import DeclarativeBase   # 是 SQLAlchemy 提供的一个基类
+from datetime import datetime
 
-from sqlalchemy import Integer, Text, Boolean, ForeignKey, String, UniqueConstraint
+from sqlalchemy import (
+    Boolean, DateTime, ForeignKey, ForeignKeyConstraint, Index, Integer, String, Text,
+    UniqueConstraint,
+)
 
 from sqlalchemy.orm import (
     DeclarativeBase,
@@ -93,8 +96,31 @@ class User(Base):
             back_populates="user" )                      # "user" 指的是另一边 Task class 里的属性名字
 
 
+class Document(Base):
+    __tablename__ = "documents"
+    __table_args__ = (
+        UniqueConstraint("owner_id", "source_id", name="uq_documents_owner_source"),
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    owner_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    source_id: Mapped[str] = mapped_column(Text)
+    filename: Mapped[str | None] = mapped_column(Text)
+    indexed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+
 class DocumentChunk(Base):
     __tablename__ = "document_chunks"
+    __table_args__ = (
+        # Shared legacy chunks have a NULL owner and do not require a document row.
+        ForeignKeyConstraint(
+            ["owner_id", "source_id"],
+            ["documents.owner_id", "documents.source_id"],
+            name="fk_document_chunks_document",
+            ondelete="CASCADE",
+        ),
+        Index("ix_document_chunks_owner_source", "owner_id", "source_id"),
+    )
     id: Mapped[str] = mapped_column(
         Text,
         primary_key=True
@@ -109,6 +135,7 @@ class DocumentChunk(Base):
         Text,
         nullable=False
     )
+    page_number: Mapped[int | None] = mapped_column(Integer)
     embedding: Mapped[list[float]] = mapped_column(
         Vector(1536),
         nullable=False

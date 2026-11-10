@@ -1,7 +1,7 @@
-from sqlalchemy import select, or_
+from sqlalchemy import and_, or_, select
 from sqlalchemy.orm import Session
 
-from ai_task_manager.models import DocumentChunk
+from ai_task_manager.models import Document, DocumentChunk
 from ai_task_manager.llm import client
 
 
@@ -28,28 +28,44 @@ def db_semantic_retrieve(question:str, db: Session, user_id: int, top_k:int = 2)
     distance = DocumentChunk.embedding.cosine_distance(
         query_vector
     ).label("distance")  # 给这个计算结果取名字,是SQL 查询结果里的列名
-    # 3.构造 SQL
-    # 每每行返回 chunk_id、source_id、text、distance （数据库计算出的距离）四个值。
-    stmt = (select(DocumentChunk.id, DocumentChunk.source_id, DocumentChunk.text, distance)
+    stmt = (
+        select(
+            DocumentChunk.id,
+            DocumentChunk.source_id,
+            DocumentChunk.text,
+            DocumentChunk.page_number,
+            Document.filename,
+            distance,
+        )
+        .select_from(DocumentChunk)
+        .outerjoin(
+            Document,
+            and_(
+                Document.owner_id == DocumentChunk.owner_id,
+                Document.source_id == DocumentChunk.source_id,
+            ),
+        )
         .where(
-        or_(
-            DocumentChunk.owner_id == user_id,          # WHERE owner_id = 当前用户ID OR owner_id IS NULL
-            DocumentChunk.owner_id.is_(None),
+            or_(
+                DocumentChunk.owner_id == user_id,
+                DocumentChunk.owner_id.is_(None),
+            )
         )
-        )
-    .order_by(distance)
-    .limit(top_k)
+        .order_by(distance)
+        .limit(top_k)
     )
 
     # 4.数据库执行
     rows = db.execute(stmt).all()  # 同时取距离，所以改用 execute()
     # 5.转换为字典式检索结果格式
     results = []
-    for chunk_id, source_id, text, dist in rows:
+    for chunk_id, source_id, text, page_number, filename, dist in rows:
         results.append({
             "id": chunk_id,
             "source_id": source_id,
             "text": text,
+            "page_number": page_number,
+            "filename": filename,
             "distance": float(dist),
             "score": 1 - float(dist),
         })
@@ -74,22 +90,13 @@ def answer_with_rag(question: str, db: Session, user_id: int) -> dict:
         return {
             "answer": "Can't determine the answer from the documents.",
             "retrieved_chunk_ids": [],
+            "sources": [],
         }
 
-
-
-    retrieve_docs = filtered_docs
-
-    # "".join()：用前面的“分隔符”，把后面列表里的多个字符串连接成一个大字符串。
-    texts = []
-
-    for doc in retrieve_docs:
-        texts.append(
-            f"[Chunk: {doc['id']}; Source: {doc['source_id']}]\n"
-            f"{doc['text']}"
-        )
-
-    context = "\n\n".join(texts)
+    context = "\n\n".join(
+        f"[Excerpt {index}]\n{doc['text']}"
+        for index, doc in enumerate(filtered_docs, start=1)
+    )
 
     # 4.调用 client.responses.create()
     # 准备发给llm的inout，把context和question放一起
@@ -102,7 +109,8 @@ def answer_with_rag(question: str, db: Session, user_id: int) -> dict:
         instructions=(
             "Answer using only the provided context. "
             "If the context does not support an answer, say you don't know. "
-            "Cite the exact Chunk ID and Source ID supporting your answer."
+            "Return the answer without a source list. "
+            "Source details are shown separately by the application."
         ),
         input=llm_input,
     )
@@ -111,5 +119,15 @@ def answer_with_rag(question: str, db: Session, user_id: int) -> dict:
         "answer": response.output_text,
         "retrieved_chunk_ids": [
             doc["id"] for doc in filtered_docs
+        ],
+        "sources": [
+            {
+                "chunk_id": doc["id"],
+                "source_id": doc["source_id"],
+                "filename": doc["filename"],
+                "page_number": doc["page_number"],
+                "text": doc["text"],
+            }
+            for doc in filtered_docs
         ],
     }

@@ -15,7 +15,8 @@ from pypdf import PdfReader   # PDF 解析器	读取 PDF 页面，直接提取�
 from pypdf.errors import PdfReadError   # PDF 读取异常	处理一部分 PDF 解析错误
 
 
-def extract_pdf_text(pdf_bytes: bytes) -> str:  # pdf_bytes: bytes  用户上传文件，程序收到的是二进制数据，不是字符串.这时候的 pdf_bytes 是 Python 的 bytes 对象，不是磁盘上的文件路径
+def extract_pdf_pages(pdf_bytes: bytes) -> list[tuple[int, str]]:
+    """Extract nonempty pages with their original one-based PDF page numbers."""
     if not pdf_bytes.startswith(b"%PDF-"):
         raise ValueError("Invalid PDF file")
 
@@ -31,7 +32,7 @@ def extract_pdf_text(pdf_bytes: bytes) -> str:  # pdf_bytes: bytes  用户上传
         if len(reader.pages) > 30:  # 表示 PDF 的页面集合
             raise ValueError("PDF exceeds 30 pages")
 
-        texts = []
+        pages = []
         ocr_page_count = 0   # 记录已经触发过OCR 的页面数量
 
         with pymupdf.open(      # PyMuPDF，这里主要负责把页面渲染成图片
@@ -82,23 +83,25 @@ def extract_pdf_text(pdf_bytes: bytes) -> str:  # pdf_bytes: bytes  用户上传
                     # PyMuPDF 把 PDF 页面变成图片。Tesseract 才是真正识别图片中文字的工具
 
                 if page_text:
-                    texts.append(page_text)
+                    pages.append((i + 1, page_text))
 
     # 把捕获到的异常对象保存到变量 exc 里。exc 是 exception（异常）的缩写
     except (PdfReadError, pymupdf.FileDataError) as exc:
         raise ValueError("PDF is damaged or unsupported") from exc      # 这个新异常，是由刚刚捕获的原始异常引起的
 
-    text = "\n\n".join(texts)   #一个 \n 是换到下一行。两个 \n\n 会在两段文字之间空出一行
-
-    if not text:
+    if not pages:
         raise ValueError(
             "No text could be extracted, including by OCR"
         )
 
-    if len(text) > 100_000:# 就是整数：100000
+    if sum(len(text) for _, text in pages) + 2 * (len(pages) - 1) > 100_000:
         raise ValueError("Extracted text is too long")
 
-    return text
+    return pages
+
+
+def extract_pdf_text(pdf_bytes: bytes) -> str:
+    return "\n\n".join(text for _, text in extract_pdf_pages(pdf_bytes))
 
 
 # 用户上传 PDF

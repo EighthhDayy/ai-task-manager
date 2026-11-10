@@ -1,12 +1,16 @@
 # ingestion  名词，意思是：摄入、吸收、导入。
 # 可以理解为“把外部数据导入系统，并进行处理”
 
-from sqlalchemy import delete
+from collections.abc import Iterable
+
+from sqlalchemy import delete, func
+from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.orm import Session
 
 from ai_task_manager.chunking import smart_chunk_document
 from ai_task_manager.llm import client
-from ai_task_manager.models import DocumentChunk
+from ai_task_manager.models import Document, DocumentChunk
+from ai_task_manager.pdf_utils import extract_pdf_pages
 
 # index_document: 把新文档转为 Chunk 和 Embedding，并写入数据库
 def index_document(
@@ -14,32 +18,52 @@ def index_document(
     text: str,
     user_id: int,
     db: Session,
+    *,
+    filename: str | None = None,
 ) -> dict:
-    # 1. 检查用户输入的source_id和text
-    source_id = source_id.strip()            # 去掉字符串开头和结尾的空白字符，但不会删除中间的空白
-    text = text.strip()
+    return _index_sections(source_id, [(None, text)], user_id, db, filename=filename)
 
-    if not source_id or not text:
-        raise ValueError("source_id and text cannot be empty")
-    # 2.切块
-    # 先把用户输入的数据转换成函数接受的形式:dict
-    document = {
-        "id": source_id,
-        "text": text,
-    }
-    chunks = smart_chunk_document(
-        document=document,
-        chunk_size=500,
-        chunk_overlap=80
+
+def index_pdf_document(
+    source_id: str,
+    pdf_bytes: bytes,
+    user_id: int,
+    db: Session,
+    *,
+    filename: str | None = None,
+) -> dict:
+    return _index_sections(
+        source_id, extract_pdf_pages(pdf_bytes), user_id, db, filename=filename
     )
-    # 如果没有chunk
+
+
+def _index_sections(
+    source_id: str,
+    sections: Iterable[tuple[int | None, str]],
+    user_id: int,
+    db: Session,
+    *,
+    filename: str | None,
+) -> dict:
+    source_id = source_id.strip()
+    if not source_id:
+        raise ValueError("source_id and text cannot be empty")
+
+    chunks: list[tuple[int | None, str]] = []
+    for page_number, text in sections:
+        for chunk in smart_chunk_document(
+            document={"id": source_id, "text": text.strip()},
+            chunk_size=500,
+            chunk_overlap=80,
+        ):
+            if chunk["text"].strip():
+                chunks.append((page_number, chunk["text"]))
+
     if not chunks:
-        raise ValueError("Document produced no chunks")
+        raise ValueError("source_id and text cannot be empty")
 
     # 3.一次请求，批量生成全部 Chunk 的 Embedding
-    texts = []
-    for chunk in chunks:
-        texts.append(chunk["text"])
+    texts = [text for _, text in chunks]
     # 调用open ai 的Embedding API
     response = client.embeddings.create(
         model="text-embedding-3-small",
@@ -64,7 +88,7 @@ def index_document(
     
     records = []
 
-    for i, (chunk,vector) in enumerate(
+    for i, ((page_number, chunk_text), vector) in enumerate(
         zip(chunks,embeddings),
         start = 1
     ):
@@ -73,7 +97,8 @@ def index_document(
                 id = f"user-{user_id}:{source_id}:{i}",     # 即使两个用户都上传名为 holiday-policy 的文档，Chunk 主键也不会发生冲突
                 source_id=source_id,
                 owner_id=user_id,
-                text=chunk["text"],
+                text=chunk_text,
+                page_number=page_number,
                 embedding=vector,
             )
         )
@@ -84,8 +109,23 @@ def index_document(
     #     (3, ({"text": "Coffee"}, [0.5, 0.6])),
     # ]
 
-    # 7. 在同一个数据库事务中替换旧 Chunk
+    # 7. 在同一个数据库事务中保存元数据并替换旧 Chunk
     try:
+        document_insert = insert(Document).values(
+            owner_id=user_id,
+            source_id=source_id,
+            filename=filename,
+            indexed_at=func.statement_timestamp(),
+        )
+        # Lock the document first so reindexing and deletion serialize on the same row.
+        db.execute(document_insert.on_conflict_do_update(
+            constraint="uq_documents_owner_source",
+            set_={
+                "filename": document_insert.excluded.filename,
+                "indexed_at": document_insert.excluded.indexed_at,
+            },
+        ))
+
         stmt = delete(DocumentChunk).where(
             DocumentChunk.owner_id==user_id,
             DocumentChunk.source_id==source_id      # 重新索引时，只能替换当前用户自己的同名文档，不会删除其他用户的 Chunk，也不会删除之前的共享 company-guide

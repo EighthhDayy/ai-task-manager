@@ -3,13 +3,14 @@ import logging
 logger = logging.getLogger(__name__)
 
 # HTTP请求的路由
-from fastapi import APIRouter, Depends, HTTPException, File, Form, UploadFile
+from fastapi import APIRouter, Depends, HTTPException, File, Form, Response, UploadFile
 
 
 from ai_task_manager.schemas import ImproveTaskRequest, ImproveTaskResponse, StreamAIRequest, AgentRequest, AskDocsRequest, AskDocsResponse
 from ai_task_manager.auth import get_current_user
 
-from ai_task_manager.models import User
+from ai_task_manager.models import Document, DocumentChunk, User
+from sqlalchemy import delete, func, select
 from sqlalchemy.orm import Session
 from ai_task_manager.database import get_db
 
@@ -32,13 +33,12 @@ from openai import OpenAIError
 from sqlalchemy.exc import SQLAlchemyError
 
 from ai_task_manager.schemas import (
+    DocumentSummary,
     IndexDocumentRequest,
     IndexDocumentResponse,
 )
 
-from ai_task_manager.ingestion import index_document
-
-from ai_task_manager.pdf_utils import extract_pdf_text
+from ai_task_manager.ingestion import index_document, index_pdf_document
 
 
 import os
@@ -46,13 +46,17 @@ import os
 from pathlib import Path
 from uuid import uuid4
 
-from redis.exceptions import RedisError
-
 from ai_task_manager.queue_config import document_queue
 
 
 
 router = APIRouter(tags=["AI Function"])
+
+
+def pdf_filename(filename: str | None) -> str:
+    # The client-provided name is display metadata, never a storage path.
+    return (filename or "").replace("\\", "/").rsplit("/", 1)[-1].replace("\x00", "").strip()
+
 
 @router.post("/ai/improve-task", status_code=200, response_model=ImproveTaskResponse)
 def openai_improve_task(
@@ -117,6 +121,61 @@ def ask_docs_route(
             detail="RAG service is temporarily unavailable",
         )
 
+@router.get("/ai/documents", response_model=list[DocumentSummary])
+def list_documents(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    chunk_count = (
+        select(func.count())
+        .select_from(DocumentChunk)
+        .where(
+            DocumentChunk.owner_id == Document.owner_id,
+            DocumentChunk.source_id == Document.source_id,
+        )
+        .scalar_subquery()
+    )
+    stmt = (
+        select(
+            Document.id,
+            Document.source_id,
+            Document.filename,
+            Document.indexed_at,
+            chunk_count.label("chunk_count"),
+        )
+        .where(Document.owner_id == current_user.id)
+        .order_by(Document.indexed_at.desc().nulls_last(), Document.id.desc())
+    )
+    try:
+        return [DocumentSummary(**row) for row in db.execute(stmt).mappings()]
+    except SQLAlchemyError:
+        logger.exception("Document list database query failed")
+        raise HTTPException(status_code=503, detail="Document list is temporarily unavailable")
+
+
+@router.delete("/ai/documents/{document_id}", status_code=204)
+def delete_document(
+    document_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    stmt = (
+        delete(Document)
+        .where(Document.id == document_id, Document.owner_id == current_user.id)
+        .returning(Document.id)
+    )
+    try:
+        deleted_id = db.execute(stmt).scalar_one_or_none()
+        if deleted_id is None:
+            raise HTTPException(status_code=404, detail="Document not found")
+        db.commit()
+    except SQLAlchemyError:
+        db.rollback()
+        logger.exception("Document deletion failed")
+        raise HTTPException(status_code=503, detail="Document deletion is temporarily unavailable")
+    return Response(status_code=204)
+
+
 @router.post("/ai/documents", response_model=IndexDocumentResponse, status_code=200)
 def upload_document(
     request: IndexDocumentRequest,
@@ -162,7 +221,8 @@ def upload_pdf_document(
     db: Session = Depends(get_db),
 ):
     # 1. 检查文件名
-    if not (file.filename or "").lower().endswith(".pdf"):
+    filename = pdf_filename(file.filename)
+    if not filename.lower().endswith(".pdf"):
         raise HTTPException(
             status_code=422,
             detail="Only PDF files are supported",
@@ -180,15 +240,12 @@ def upload_pdf_document(
         )
 
     try:
-        # 3. PDF -> 纯文本
-        text = extract_pdf_text(pdf_bytes)
-
-        # 4. 复用已经写好的入库函数
-        result = index_document(
+        result = index_pdf_document(
             source_id=source_id,
-            text=text,
+            pdf_bytes=pdf_bytes,
             user_id=current_user.id,
             db=db,
+            filename=filename,
         )
 
         return IndexDocumentResponse(**result)
@@ -231,7 +288,8 @@ def upload_pdf_async(
             detail="Invalid source_id",
         )
 
-    if not (file.filename or "").lower().endswith(".pdf"):
+    filename = pdf_filename(file.filename)
+    if not filename.lower().endswith(".pdf"):
         raise HTTPException(
             status_code=422,
             detail="Only PDF files are supported",
@@ -269,6 +327,7 @@ def upload_pdf_async(
             upload_id,
             source_id,
             current_user.id,
+            filename,
             job_timeout=600,
             result_ttl=86400,
             failure_ttl=86400,
