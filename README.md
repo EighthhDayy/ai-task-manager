@@ -30,8 +30,6 @@
 ---
 
 ## Overview
-
-The Demo Link:
 ### MCP task tools
 
 An optional stdio MCP server exposes `list_tasks`, `create_task`, and `complete_task`
