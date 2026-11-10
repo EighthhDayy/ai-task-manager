@@ -1,3 +1,17 @@
+export type RagSource = {
+  chunk_id: string
+  source_id: string
+  filename: string | null
+  page_number: number | null
+  text: string
+}
+
+export type RagAnswer = {
+  answer: string
+  retrieved_chunk_ids: string[]
+  sources?: RagSource[]
+}
+
 export type Task = {
   id: number
   title: string
@@ -7,6 +21,27 @@ export type Task = {
 }
 
 export type User = { id: number; username: string }
+
+export type DocumentUploadJob = {
+  job_id: string
+  status: string
+}
+
+export type IndexedDocument = {
+  id: number
+  source_id: string
+  filename: string | null
+  indexed_at: string | null
+  chunk_count: number
+}
+
+export type DocumentJobStatus = {
+  job_id: string
+  status: string
+  result?: unknown
+  error?: string | null
+}
+
 export type ChatAnswer = { answer: string; model: string; source_url: string }
 export type AgentToolEvent = {
   name: string
@@ -93,6 +128,37 @@ function extractToolEvents(payload: unknown): AgentToolEvent[] {
 }
 
 export const api = {
+  listDocuments: (token: string) =>
+    request<IndexedDocument[]>('/ai/documents', {}, token),
+  deleteDocument: (token: string, id: number) =>
+    request<void>(`/ai/documents/${id}`, { method: 'DELETE' }, token),
+  askDocs: (token: string, question: string) =>
+    request<RagAnswer>('/ai/ask-docs', { method: 'POST', body: JSON.stringify({ question }) }, token),
+  uploadPdfAsync: (
+    token: string,
+    file: File,
+    sourceId: string,
+  ) => {
+    const formData = new FormData()
+
+    formData.append('source_id', sourceId)
+    formData.append('file', file, file.name)
+
+    return request<DocumentUploadJob>(
+      '/ai/documents/upload-async',
+      {
+        method: 'POST',
+        body: formData,
+      },
+      token,
+    )
+  },
+  getDocumentJob: (token: string, jobId: string) =>
+    request<DocumentJobStatus>(
+      `/ai/document-jobs/${encodeURIComponent(jobId)}`,
+      {},
+      token,
+    ),
   login: (username: string, password: string) =>
     request<{ access_token: string; token_type: string }>('/login', {
       method: 'POST', body: JSON.stringify({ username, password }),
