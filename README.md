@@ -29,7 +29,7 @@
 
 ## Live Demo
 
-[Open the interactive demo](https://eighthhdayy.github.io/ai-task-manager/)
+[Demo](https://eighthhdayy.github.io/ai-task-manager/)
 
 This is a **simulated browser-only demo**. Task management, Agent tool calls and deletion confirmations, Qwen answers, and RAG indexing/retrieval are simulated locally. It does not connect to a backend or call real AI APIs. No login or API keys are required. Selected files are not uploaded or parsed; RAG answers use the built-in sample document. Changes last only until the page is refreshed.
 
