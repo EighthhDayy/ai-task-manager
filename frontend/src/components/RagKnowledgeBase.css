@@ -1,0 +1,63 @@
+/* RAG panel additions. Existing global workspace theme is intentionally reused. */
+.rag-main { min-width: 0; overflow: hidden; }
+.rag-upload { margin: 0 24px 24px; padding: 18px; border: 1px dashed #c9c6ee; background: #faf9ff; border-radius: 13px; display: flex; flex-direction: column; align-items: center; gap: 12px; }
+.rag-upload-picker { width: 100%; display: flex; align-items: center; flex-direction: column; text-align: center; gap: 9px; cursor: pointer; padding: 12px; color: #776be5; }
+.rag-upload-picker strong { font-size: 13px; color: #4f4b70; overflow-wrap: anywhere; }
+.rag-upload-picker span { font-size: 11px; line-height: 1.5; color: #9895ad; }
+.rag-upload .rag-file-input { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
+.rag-upload:focus-within .rag-upload-picker { outline: 2px solid #776be5; outline-offset: 4px; border-radius: 8px; }
+.rag-error, .rag-notice { margin: 0 24px 20px; padding: 12px 14px; border-radius: 9px; font-size: 11px; line-height: 1.7; }
+.rag-error { display: flex; align-items: flex-start; gap: 8px; background: #fff4f5; color: #b94c62; border: 1px solid #fadfe2; }
+.rag-error svg { flex-shrink: 0; margin-top: 2px; }
+.rag-notice { background: #fff8ec; color: #9b7a43; }
+.rag-job { margin: 0 24px 24px; padding: 15px 16px; background: #f7f7fd; border: 1px solid #ecebf7; border-radius: 11px; }
+.rag-job-top { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.rag-job-top span { display: inline-flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 700; color: #4c4b68; min-width: 0; overflow-wrap: anywhere; }
+.rag-job-top strong { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; color: #7869dd; white-space: nowrap; }
+.rag-job-top strong.rag-done { color: #398c67; }
+.rag-job-top strong.rag-failed { color: #c65a62; }
+.rag-job p { color: #9a98aa; font-size: 10px; overflow-wrap: anywhere; line-height: 1.6; margin: 10px 0 0; }
+.rag-job code { color: #5c5678; font-family: ui-monospace, SFMono-Regular, Consolas, monospace; }
+.rag-job p.rag-success { color: #398c67; font-size: 11px; display: flex; align-items: center; gap: 7px; }
+.rag-job .rag-retry { margin-top: 12px; }
+.rag-documents { margin: 0 24px 24px; }
+.rag-documents-header { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 12px; }
+.rag-documents-header h3 { margin: 0 0 5px; font-size: 14px; color: #41405c; }
+.rag-documents-header p, .rag-documents-empty { margin: 0; font-size: 12px; color: #696581; }
+.rag-documents .rag-error { margin: 0 0 12px; }
+.rag-document-list { list-style: none; display: grid; gap: 8px; margin: 10px 0 0; padding: 0; }
+.rag-document { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border: 1px solid #ecebf7; border-radius: 9px; color: #766ac8; }
+.rag-document > svg { flex-shrink: 0; }
+.rag-document-info { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.rag-document-info strong, .rag-document-info small { display: block; color: #4f4b70; }
+.rag-document-info strong { font-size: 13px; }
+.rag-document-info small { margin-top: 3px; font-size: 11px; }
+.rag-delete { flex-shrink: 0; color: #a0374a; }
+.rag-divider { border-top: 1px solid #eeedf5; margin: 20px 24px; }
+.rag-ask-head { display: flex; align-items: flex-start; gap: 11px; margin: 0 24px 16px; color: #8372ea; }
+.rag-ask-head h3 { margin: 0 0 5px; font-size: 14px; color: #41405c; }
+.rag-ask-head p { margin: 0; font-size: 11px; color: #a5a3b8; }
+.rag-ask-form { margin: 0 24px 22px; display: flex; flex-direction: column; gap: 12px; }
+.rag-ask-form textarea { padding: 15px; border: 1px solid #e5e4ef; border-radius: 11px; resize: vertical; min-height: 96px; background: #fff; color: #4b4867; font: inherit; font-size: 12px; line-height: 1.7; outline: none; }
+.rag-ask-form textarea:focus { border-color: #a99dff; box-shadow: 0 0 0 3px rgba(126, 109, 233, .08); }
+.rag-ask-actions { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.rag-ask-actions span { color: #a9a7b8; font-size: 10px; }
+.rag-answer { margin: 0 24px 24px; padding: 18px; background: #fafaff; border: 1px solid #e9e7f5; border-radius: 12px; }
+.rag-answer h4 { margin: 0 0 13px; font-size: 12px; color: #4d4770; }
+.rag-answer-text { white-space: pre-wrap; overflow-wrap: anywhere; font-size: 12px; line-height: 1.85; color: #4d4a66; }
+.rag-evidence { border-top: 1px solid #ebe9f4; padding-top: 13px; margin-top: 16px; }
+.rag-evidence strong { font-size: 11px; color: #767090; }
+.rag-source-list { display: grid; gap: 8px; margin: 10px 0 0; padding: 0; list-style: none; }
+.rag-source { padding: 12px; border: 1px solid #ebe9f4; border-radius: 9px; background: white; overflow-wrap: anywhere; }
+.rag-source-header { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 12px; }
+.rag-source-header strong { font-size: 12px; color: #4d4770; }
+.rag-source-header span { font-size: 11px; color: #696581; }
+.rag-source blockquote { margin: 8px 0 0; white-space: pre-wrap; font-size: 12px; line-height: 1.65; color: #4d4a66; }
+.rag-chunks { display: flex; flex-wrap: wrap; gap: 7px; margin: 10px 0; }
+.rag-chunks code { background: #f0eef8; border-radius: 6px; padding: 6px 8px; font-size: 10px; color: #575171; overflow-wrap: anywhere; }
+.rag-evidence p { color: #696581; font-size: 11px; line-height: 1.6; margin-top: 8px; }
+@media (max-width: 600px) {
+  .rag-upload, .rag-ask-form, .rag-ask-head, .rag-answer, .rag-job, .rag-documents { margin-left: 14px; margin-right: 14px; }
+  .rag-divider { margin-left: 14px; margin-right: 14px; }
+  .rag-job-top { align-items: flex-start; flex-direction: column; }
+}

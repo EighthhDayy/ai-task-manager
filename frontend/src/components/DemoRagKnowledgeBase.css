@@ -1,0 +1,177 @@
+/* Interactive RAG Demo */
+
+.rag-demo {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  width: 100%;
+  min-width: 0;
+}
+
+/* Cards */
+.rag-demo .rag-demo-card {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 16px;
+  padding: 28px 32px;
+  border-radius: 20px;
+}
+
+/* Titles */
+.rag-demo .rag-demo-card > h3 {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+.rag-demo .rag-demo-card > h3 svg {
+  color: #7867ed;
+  flex-shrink: 0;
+}
+
+/* Descriptions */
+.rag-demo .rag-demo-card > p {
+  margin: 0;
+  color: #8586a4;
+  font-size: 14px;
+  line-height: 1.8;
+}
+
+/* Primary actions */
+.rag-demo .rag-demo-card > .primary-button,
+.rag-demo .rag-demo-card > .secondary-button {
+  align-self: flex-start;
+}
+
+/* File upload */
+.rag-demo input[type="file"] {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 18px;
+  border: 1px dashed #d9dbef;
+  border-radius: 14px;
+  background: #fafaff;
+  color: #74758f;
+  font-size: 14px;
+}
+
+.rag-demo input[type="file"]::file-selector-button {
+  padding: 10px 16px;
+  margin-right: 14px;
+  border: 1px solid #dedcf8;
+  border-radius: 9px;
+  background: #f2f0ff;
+  color: #6c5ce7;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* Example questions */
+.rag-demo .rag-demo-examples {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 4px;
+}
+
+.rag-demo .rag-demo-examples button {
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* Question form */
+.rag-demo .rag-ask-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.rag-demo .rag-ask-form textarea {
+  box-sizing: border-box;
+  min-height: 125px;
+  width: 100%;
+  padding: 16px 18px;
+  border: 1px solid #dedff0;
+  border-radius: 13px;
+  background: #fff;
+  line-height: 1.7;
+}
+
+.rag-demo .rag-ask-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+/* Index status */
+.rag-demo .rag-job {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 20px;
+  border-radius: 14px;
+}
+
+.rag-demo .rag-job strong {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.rag-demo .rag-job p {
+  margin: 0;
+  line-height: 1.7;
+}
+
+/* Answer and evidence */
+.rag-demo .rag-answer {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 8px;
+  padding: 22px;
+  border-radius: 14px;
+}
+
+.rag-demo .rag-answer h4,
+.rag-demo .rag-evidence p {
+  margin: 0;
+}
+
+.rag-demo .rag-evidence {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.rag-demo .rag-evidence blockquote {
+  margin: 8px 0 0;
+  padding: 16px 18px;
+  border-left: 3px solid #9585f4;
+  border-radius: 8px;
+  background: #f8f7ff;
+  line-height: 1.8;
+}
+
+/* Mobile */
+@media (max-width: 640px) {
+  .rag-demo {
+    gap: 16px;
+  }
+
+  .rag-demo .rag-demo-card {
+    padding: 20px;
+  }
+
+  .rag-demo .rag-demo-examples button {
+    width: 100%;
+    justify-content: flex-start;
+  }
+}
